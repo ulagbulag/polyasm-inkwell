@@ -52,7 +52,9 @@ use crate::passes::PassBuilderOptions;
 use crate::support::{LLVMString, to_c_str};
 #[llvm_versions(13..)]
 use crate::targets::TargetMachine;
-use crate::targets::{CodeModel, InitializationConfig, Target, TargetTriple};
+use crate::targets::{CodeModel, TargetTriple};
+#[cfg(not(feature = "hosted"))]
+use crate::targets::{InitializationConfig, Target};
 use crate::types::{AsTypeRef, BasicType, FunctionType, StructType};
 
 use crate::values::BasicValue;
@@ -431,6 +433,7 @@ impl<'ctx> Module<'ctx> {
     pub fn create_execution_engine(&self) -> Result<ExecutionEngine<'ctx>, LLVMString> {
         ExecutionEngine::link_in_mc_jit();
         ExecutionEngine::link_in_interpreter();
+        #[cfg(not(feature = "hosted"))]
         Target::initialize_native(&InitializationConfig::default()).map_err(|mut err_string| {
             err_string.push('\0');
 
@@ -482,6 +485,7 @@ impl<'ctx> Module<'ctx> {
     // SubType: ExecutionEngine<Interpreter>
     pub fn create_interpreter_execution_engine(&self) -> Result<ExecutionEngine<'ctx>, LLVMString> {
         ExecutionEngine::link_in_interpreter();
+        #[cfg(not(feature = "hosted"))]
         Target::initialize_native(&InitializationConfig::default()).map_err(|mut err_string| {
             err_string.push('\0');
 
@@ -538,6 +542,7 @@ impl<'ctx> Module<'ctx> {
         opt_level: OptimizationLevel,
     ) -> Result<ExecutionEngine<'ctx>, LLVMString> {
         ExecutionEngine::link_in_mc_jit();
+        #[cfg(not(feature = "hosted"))]
         Target::initialize_native(&InitializationConfig::default()).map_err(|mut err_string| {
             err_string.push('\0');
 
@@ -624,6 +629,7 @@ impl<'ctx> Module<'ctx> {
         ExecutionEngine::link_in_mc_jit();
 
         // 1) Initialize the native target
+        #[cfg(not(feature = "hosted"))]
         Target::initialize_native(&InitializationConfig::default()).map_err(|mut err_string| {
             err_string.push('\0');
             LLVMString::create_from_str(&err_string)

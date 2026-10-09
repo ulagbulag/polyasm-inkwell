@@ -106,6 +106,21 @@ llvm21-1-prefer-static = ["llvm21-1", "llvm-sys-211/prefer-static"]
 llvm22-1-prefer-static = ["llvm22-1", "llvm-sys-221/prefer-static"]
 llvm23-1-prefer-static = ["llvm23-1", "llvm-sys-231/prefer-static"]
 
+# Binds the LLVM of the process that loads inkwell, the way a compiler linking
+# LLVM itself hosts it: llvm-sys builds with LLVM linking off and its
+# `llvm-config`-built target wrappers off, and libffi stays with the host.
+llvm23-1-hosted = [
+    "hosted",
+    "llvm-sys-231/disable-alltargets-init",
+    "llvm23-1-no-llvm-linking",
+    "no-libffi-linking",
+]
+
+# Leaves `Target::initialize_native` and `Target::initialize_all` to the host:
+# both reach llvm-sys's `llvm-config`-built wrappers, while every per-target
+# initializer reaches LLVM itself.
+hosted = []
+
 # Don't force linking to libffi on non-windows platforms. Without this feature
 # inkwell always links to libffi on non-windows platforms.
 no-libffi-linking = []
